@@ -238,6 +238,12 @@ view.drawLattice = function(){
             c.lineTo(ix*view.cellWidth, view.nx*view.cellHeight);
             c.stroke();
         }
+        for(var iy = 0; iy <= view.ny; iy++){ // 横線
+            c.beginPath();
+            c.moveTo(0, iy*view.cellHeight);
+            c.lineTo(view.nx*view.cellWidth, iy*view.cellHeight);
+            c.stroke();
+        }
     }
 
     // レイヤー0を背景色で塗りつぶす
