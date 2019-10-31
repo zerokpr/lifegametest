@@ -337,6 +337,7 @@ controls.step = function(state){
         clearInterval(state.timer); state.playing = false;
         state.update();
     });
+    return input;
 };
 
 // パターンを選択メニューのメソッド
