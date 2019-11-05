@@ -338,7 +338,7 @@ controls.stop = function(state){
 // 次へボタン
 // ボタンをクリックすると世代を一つだけアップデート
 controls.step = function(state){
-    var input = elt("input", {type: "value", value: "次へ"});
+    var input = elt("input", {type: "button", value: "次へ"});
     input.addEventListener("click", function(e){
         clearInterval(state.timer); state.playing = false;
         state.update();
@@ -349,7 +349,7 @@ controls.step = function(state){
 // パターンを選択メニューのメソッド
 // メニューからパターンを選択すると、そのパターンがstate.setLifeメソッドでstate.cellsにセットされる
 controls.pattern = function(state){
-    var input = elt("select");
+    var select = elt("select");
     select.appendChild(elt("option", null, "パターンを選択"));
     for(var i=0; i < state.patterns.length; i++){
         select.appendChild(elt("option", null, state.patterns[i].name));
