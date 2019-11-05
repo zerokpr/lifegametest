@@ -223,7 +223,7 @@ view.create = function(nx, ny, width, height){
 // viewLattice
 // 格子点を描画する
 view.drawLattice = function(){
-    // 各レイヤーのキャンバスをリセット
+    // 各レイヤーのCanvasをリセット
     for(var i = 0; i < view.layer.length; i++){
         view.layer[i].width = view.layer[i].width;
     }
