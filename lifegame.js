@@ -43,7 +43,7 @@ function createLifeGame(parent, nx, ny, width, height){
     var title = elt("h1", {class: "title"}, "Life Game");
     // viewオブジェクトを生成する
     var viewpanel = view.create(nx, ny, width, height);
-    // stateオブジェクトを初期化する
+    // stateオブジェクトを生成する
     state.create(nx, ny);
     // controlsオブジェクトからtoolbar要素を生成する
     var toolbar = elt("div", {class: "toolbar"});
@@ -173,7 +173,7 @@ view.create = function(nx, ny, width, height){
     view.nx = nx;
     view.ny = ny;
     view.cellWidth = view.layer[0].width/nx; // セルの幅
-    view.cellHeight = view.layer[1].height/ny; // セルの高さ
+    view.cellHeight = view.layer[0].height/ny; // セルの高さ
     // 生物を表す円の半径
     view.markRadius = (Math.min(view.cellWidth, view.cellHeight)/2.0 + 0.5) | 0;
     
