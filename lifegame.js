@@ -9,8 +9,9 @@ window.onload = function(){
         if(error){ //ファイルが読めない場合はパターンメニューを作成しない
             delete controls.pattern;
         }else{ //ファイルが読み込めたらデータをstate.patternsに格納
-            state.pattern = jsonObj;
+            state.patterns = jsonObj;
         }
+        
         //body要素内にライフゲームの各パーツ（controls, view）を生成し配置
         createLifeGame(document.body, 78, 60, 780, 600);
     });
@@ -22,10 +23,12 @@ window.onload = function(){
 function readFile(filename, callback){
     var req = new XMLHttpRequest();
     req.onreadystatechange = function(){
-        if(req.readyState === 4){
-            callback(req.response, false/*no error*/);
-        }else{
-            callback(null, true/*error */);
+        if(req.readyState == 4){
+            if(req.status == 200){
+                callback(req.response, false);  // success
+            }else{
+                callback(null, true);           // error
+            }
         }
     }
     req.open("GET", filename, true);
@@ -41,13 +44,17 @@ function readFile(filename, callback){
 function createLifeGame(parent, nx, ny, width, height){
     // タイトル
     var title = elt("h1", {class: "title"}, "Life Game");
+    
     // viewオブジェクトを生成する
     var viewpanel = view.create(nx, ny, width, height);
+    
     // stateオブジェクトを生成する
     state.create(nx, ny);
+    
     // controlsオブジェクトからtoolbar要素を生成する
     var toolbar = elt("div", {class: "toolbar"});
     for(name in controls) toolbar.appendChild(controls[name](state));
+    
     // toolbar要素とviewpanel要素を指定した要素(parent)の子要素として挿入する
     parent.appendChild(elt("div", null, title, toolbar, viewpanel));
 }
@@ -60,6 +67,7 @@ function createLifeGame(parent, nx, ny, width, height){
 state.create = function(nx, ny){
     // 格子サイズ
     state.nx = nx; state.ny = ny;
+    
     // セルを表す2次元配列を生成し初期化
     // 値が0の時は生物がいない、1の時はいる
     state.cells = new Array(ny);
@@ -67,16 +75,20 @@ state.create = function(nx, ny){
         state.cells[ix] = new Array(ny);
         for(var iy = 0; iy < ny; iy++) state.cells[ix][iy] = 0;
     }
+    
     // clickviewイベントリスナの登録:viewからのイベントでセルを変更する
     document.addEventListener("clickview", function(e){
         state.setLife(e.detail.ix, e.detail.iy, e.detail.life);
     }, false);
+    
     // changeCellイベント、changeGenerationイベントオブジェクトを生成
     state.changeCellEvent = document.createEvent("HTMLEvents");
     state.changeGenerationEvent = document.createEvent("HTMLEvents");
+    
     // generation(世代数)を追加し、0に設定
     state.generation = 0;
     state.tellGenerationChange(0);
+    
     // アニメーションの状態を表す変数
     state.playing = false;  // アニメーションが実行中であるかどうかの論理値
     state.timer = null;     // アニメーションのタイマー
@@ -137,10 +149,11 @@ state.update = function(){
             }
         }
     }
+    
     // changedCell配列に格納されているセルの変更を行う
     // 変更は性質上、排他的論理和を行うことで実装できる
     for(var i = 0; i < changedCell.length; i++){
-        state.cells[changedCell[i].ix][changedCell[i].iy] ^= 1;
+        state.cells[changedCell[i].x][changedCell[i].y] ^= 1;
     }
     // 世代数を一つ増やし、それを通知する
     state.tellGenerationChange(state.generation++);
@@ -182,17 +195,21 @@ state.clearAllCell = function(){
 view.create = function(nx, ny, width, height){
     // レイヤーを表すcanvas要素を作成
     view.layer = [];
+    
     // 生物表示用
     view.layer[0] = elt("canvas", {id: "rayer0", width: width, height: height});
+    
     // 格子線表示用
     view.layer[1] = elt("canvas", {id: "rayer1", width: width, height: height});
+    
     // 格子のサイズ、セルのサイズ、生物マーカーの半径を設定
     view.nx = nx;
     view.ny = ny;
     view.cellWidth = view.layer[0].width/nx; // セルの幅
     view.cellHeight = view.layer[0].height/ny; // セルの高さ
+    
     // 生物を表す円の半径
-    view.markRadius = (Math.min(view.cellWidth, view.cellHeight)/2.0 + 0.5) | 0;
+    view.markRadius = (Math.min(view.cellWidth, view.cellHeight)/2.5 + 0.5) | 0;
     
     // canvasコンテキストを取得
     if(view.ctx) delete view.ctx;
@@ -200,16 +217,19 @@ view.create = function(nx, ny, width, height){
     for(var i = 0; i < view.layer.length; i++){
         view.ctx.push(view.layer[i].getContext("2d"));
     }
+
     // 描画パラメータの初期設定
     view.backColor = "forestgreen"; // 背景色
     view.markColor = "white"; // 生物の色
     view.strokeStyle = "black"; // 格子線の色
     view.lineWidth = 0.2; // 格子線の幅
+    
     // 格子を描画する
     view.drawLattice();
+    
     // 世代数を表示する要素を作成
     view.generation = elt("span", {id: " generation"});
-    view.statuspanel = elt("div",{class: "status"}, "世代数:", view.generation);
+    view.statuspanel = elt("div", {class: "status"}, "世代数:", view.generation);
     
     // clickviewイベント用イベントオブジェクトを生成
     view.clickEvent = document.createEvent("HTMLEvents");
@@ -222,10 +242,12 @@ view.create = function(nx, ny, width, height){
         view.clickEvent.detail = {ix: ix, iy: iy, life: 2};
         document.dispatchEvent(view.clickEvent);
     }, false);
+
     // changeCellイベントリスナの登録: stateからのイベントでセルを再描画する
     document.addEventListener("changeCell", function(e){
         view.drawCell(e.detail.ix, e.detail.iy, e.detail.life);
     }, false);
+
     // changeGenerationイベントリスナの登録: stateからのイベントで世代数を更新する
     document.addEventListener("changegeneration", function(e){
         view.showGeneration(e.detail.generation);
@@ -363,19 +385,19 @@ controls.step = function(state){
     return input;
 };
 
-// パターンを選択メニューのメソッド
+// 「パターンを選択」メニューのメソッド
 // メニューからパターンを選択すると、そのパターンがstate.setLifeメソッドでstate.cellsにセットされる
 controls.pattern = function(state){
     var select = elt("select");
     select.appendChild(elt("option", null, "パターンを選択"));
-    for(var i=0; i < state.patterns.length; i++){
+    for(var i=0;i<state.patterns.length;i++){
         select.appendChild(elt("option", null, state.patterns[i].name));
     }
     select.selectedIndex = 0;
     select.addEventListener("change", function(e){
         clearInterval(state.timer); state.playing = false; // モードが変わったらアニメーション停止
         if(select.selectedIndex != 0){
-            placePattern(state.patterns[select.selectedIndex-1]);
+            placePattern(state.patterns[select.selectedIndex-1]); // "パターンを選択"ボタンの分一つずらす
         }
         select.selectedIndex = 0;
     });
@@ -412,4 +434,4 @@ controls.clear = function(state){
         state.clearAllCell();
     });
     return input;
-}
+};
