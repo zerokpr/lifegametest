@@ -123,12 +123,27 @@ state.update = function(){
         for(var iy = 0; iy < state.ny; iy++){
             var sum = state.getSumAround(ix, iy);
             if( sum <= 1 || sum >= 4){ //死滅条件
-                changedCell.push({x:ix, y:iy});
-                // セルの変更をコールバック
-                state.tellCellChange(ix, iy, 1);
+                if( state.cells[ix][iy]){
+                    changedCell.push({x:ix, y:iy});
+                    // セルの変更をコールバック
+                    state.tellCellChange(ix, iy, 1);
+                }
+            }else if(sum == 3){ // 周りが三匹なら生成する
+                if(!state.cells[ix][iy]){
+                    changedCell.push({x:ix, y:iy});
+                    // セルの変更をコールバック
+                    state.tellCellChange(ix, iy, 1);
+                }
             }
         }
     }
+    // changedCell配列に格納されているセルの変更を行う
+    // 変更は性質上、排他的論理和を行うことで実装できる
+    for(var i = 0; i < changedCell.length; i++){
+        state.cells[changedCell[i].ix][changedCell[i].iy] ^= 1;
+    }
+    // 世代数を一つ増やし、それを通知する
+    state.tellGenerationChange(state.generation++);
 };
 
 // セルの状態を設定するメソッド
@@ -153,7 +168,9 @@ state.clearAllCell = function(){
         for(var iy = 0; iy < state.ny; iy){
             state.setLife(ix, iy, 0);
         }
-    }  
+    } 
+    // 世代数を0としコールバックする
+    state.tellGenerationChange(state.generation = 0);
 };
 
 
