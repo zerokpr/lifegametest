@@ -138,7 +138,7 @@ state.update = function(){
                 if( state.cells[ix][iy]){
                     changedCell.push({x:ix, y:iy});
                     // セルの変更をコールバック
-                    state.tellCellChange(ix, iy, 1);
+                    state.tellCellChange(ix, iy, 0);
                 }
             }else if(sum == 3){ // 周りが三匹なら生成する
                 if(!state.cells[ix][iy]){
@@ -178,7 +178,7 @@ state.setLife = function(ix, iy, life){
 state.clearAllCell = function(){
     // 全セルの値を0にする
     for(var ix = 0; ix < state.nx; ix++){
-        for(var iy = 0; iy < state.ny; iy){
+        for(var iy = 0; iy < state.ny; iy++){
             state.setLife(ix, iy, 0);
         }
     } 
