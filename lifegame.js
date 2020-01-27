@@ -244,7 +244,7 @@ view.create = function(nx, ny, width, height){
     }, false);
 
     // changeCellイベントリスナの登録: stateからのイベントでセルを再描画する
-    document.addEventListener("changeCell", function(e){
+    document.addEventListener("changecell", function(e){
         view.drawCell(e.detail.ix, e.detail.iy, e.detail.life);
     }, false);
 
