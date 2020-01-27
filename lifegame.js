@@ -399,7 +399,7 @@ controls.pattern = function(state){
         if(select.selectedIndex != 0){
             placePattern(state.patterns[select.selectedIndex-1]); // "パターンを選択"ボタンの分一つずらす
         }
-        select.selectedIndex = 0;
+        //select.selectedIndex = 0;
     });
     return select;
     function placePattern(pattern){
